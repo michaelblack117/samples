@@ -14,6 +14,16 @@ const getOrganizations = async () => {
   }
 }
 
+const getSchemas = async () => {
+  try {
+    // Get List of Schemas
+    let schemas = await client.listSchemas();
+    return schemas;
+  }
+  catch (e) {
+    console.error(e);
+  }
+}
 const createTranscriptSchema = async () => {
   try {
     // Create Credential Schema
@@ -52,18 +62,26 @@ const createEmployeeSchema = async () => {
             ]
         }
     });
+    return employeeSchema;
   }
   catch (e) {
     console.error(e);
   }
 }
 
-const createCredentialDefinition = async (schemaId) => {
-  var credentialDefinition;
+const getCredentials = async () => {
+  try {
+    const credentials = await client.listCredentials();
+  }
+  catch (e) {
+    console.error(e);
+  }
+}
+const createCredentialDefinitionFromSchema = async (schemaId) => {
   if (schemaId === null) { throw new Error("please provide schema ID") }
   try {
     // Create Credential Definition With Schema
-    credentialDefinition = await client.createCredentialDefinition(schemaId, {
+    const credentialDefinition = await client.createCredentialDefinition(schemaId, {
         credentialDefinitionFromSchemaParameters: {
             supportRevocation: false,
             tag: "unique identifier"
@@ -77,7 +95,29 @@ const createCredentialDefinition = async (schemaId) => {
   }
 }
 
-const createConnection = async () => {
+// Buggy
+
+// const createTranscriptCredential = async () => {
+//   try {
+//     // Create Credential Definition With Schema
+//     const credentialDefinition = await client.createCredentialDefinition({
+//       credentialDefinitionFromSchemaParameters: {
+//           name: "College Transcript",
+//           version: "1.0",
+//           attrNames: ["Name", "Major", "GPA", "Year of Graduation"],
+//           supportRevocation: false,
+//           tag: "Faber Year 1"
+//       }
+//     });
+//
+//     return credentialDefinition;
+//   }
+//   catch (e) {
+//     console.error(e);
+//   }
+// }
+
+const createInvitation = async () => {
   try {
     // Generate Connection Invitation
     const invitation = await client.createConnection({
@@ -110,20 +150,29 @@ const offerCredential = async (credentialDefinitionId, connectionId) => {
 async function main() {
   try {
     let orgs = await getOrganizations();
-    console.log(orgs);
+    let faberCollege = orgs.find(x => x.name === "Faber College");
+    let acmeCorp = orgs.find(x => x.name === "ACME Corp");
+    let thriftBank = orgs.find(x => x.name === "Thrift Bank");
+
+    // let transcriptSchema = await createTranscriptSchema();
+    // let employeeSchema = await createEmployeeSchema();
+
   }
   catch (e) {
     console.error(e);
   }
 }
 
-main();
+// main();
 
 module.exports = {
   getOrganizations,
+  getSchemas,
   createTranscriptSchema,
   createEmployeeSchema,
-  createCredentialDefinition,
-  createConnection,
+  getCredentials,
+  createCredentialDefinitionFromSchema,
+  // createTranscriptCredential,
+  createInvitation,
   offerCredential
 }
