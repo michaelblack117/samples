@@ -1,29 +1,40 @@
 const assert = require('chai').assert;
 const sample = require('./index');
 
-describe('Testing Sample Functions', function() {
+describe('Testing Organization Functions', function() {
   it('List the organizations', async () => {
-    let orgs = await sample.getOrganizations();
+    let orgs = await sample.listOrganizations();
     assert.isArray(orgs);
-    assert.isNotNull(orgs[0].name);
+  })
+})
+
+describe('Testing Connection Functions', function() {
+  it('Generate an Invitation to Connect', async () => {
+    let invitation = await sample.createConnection();
+    assert.isObject(invitation);
+    assert.equal(invitation.state, "Invited");
   })
 
+  it('Retrieve Connection', async () => {
+    let invitation = await sample.createConnection();
+    let connection = await sample.getConnection(invitation.connectionId);
+    assert.equal(invitation.connectionId, connection.connectionId);
+  })
+})
+
+describe('Testing Credential Functions', function() {
   it('List Schema Definitions', async () => {
     let schemas = await sample.getSchemas();
     assert.isArray(schemas);
   })
 
-  // TODO fix errors when creating schemas
-  //
-  // it('Create College Transcript Schema', async () => {
-  //   let transcriptSchema = await sample.createTranscriptSchema();
-  //   assert.isNotNull(transcriptSchema);
-  // })
-
-  // TODO fix errors when creating credential definitions
-
-  it('Generate an Invitation to Connect', async () => {
-    let invitation = await sample.createInvitation();
-    assert.isObject(invitation);
+  it('List Credential Definitions', async () => {
+    let definitions = await sample.listCredentialDefinitions();
+    assert.isArray(definitions);
   })
-});
+
+  it('List Credentials', async () => {
+    let credentials = await sample.listCredentials();
+    assert.isArray(credentials);
+  })
+})
