@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "mocha test.js || true"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@streetcred.id/service-clients": "^1.1.2051"
+    "@streetcred.id/service-clients": "^1.1.2051",
+    "qrcode-terminal": "^0.12.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",

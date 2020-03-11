@@ -20,6 +20,13 @@ describe('Testing Connection Functions', function() {
     let connection = await sample.getConnection(invitation.connectionId);
     assert.equal(invitation.connectionId, connection.connectionId);
   })
+
+  it('Delete Connection', async () => {
+    let connection = await sample.createConnection();
+    let result = await sample.deleteConnection(connection.connectionId);
+    assert.isObject(result);
+
+  })
 })
 
 describe('Testing Credential Functions', function() {
@@ -36,5 +43,12 @@ describe('Testing Credential Functions', function() {
   it('List Credentials', async () => {
     let credentials = await sample.listCredentials();
     assert.isArray(credentials);
+  })
+})
+
+describe('Testing Verification Functions', function() {
+  it('List Verification Definitions', async () => {
+    let definitions = await sample.listVerificationDefinitions();
+    assert.isArray(definitions);
   })
 })
