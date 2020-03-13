@@ -4,7 +4,7 @@ const AgencyServiceClient = require("@streetcred.id/service-clients").AgencyServ
 const Credentials = require("@streetcred.id/service-clients").Credentials;
 
 const client = new AgencyServiceClient(new Credentials(
-  "pGtYaJIopuMMYh2PFsNE3oafUTYxjg743_ToPSyoHS8", // access token
+  "2DCwKX6P225a5GqrrgVduplOB1BAvPDi7-dPBLguzko", // access token
   "ecfdc8b9ba9045bca3589279ac5b86c0" // subscription token
 ));
 
@@ -123,50 +123,84 @@ const run = async () => {
     let transcriptSchema = FaberCollege.getTranscriptSchema();
     if (transcriptSchema) { console.log("\t✓ Retrieved Transcript Schema from Faber College"); }
     let verificationDefinitions = await client.listVerificationDefinitions();
-    let verificationDefinition = verificationDefinitions.find(x => x.name === "Job Application");
+    let verificationDefinition = verificationDefinitions.find(x => x.data.name === "Job Application");
     if (verificationDefinition === undefined) {
       console.log("\tCreating ACME Job Application Definition...");
       verificationDefinition = await client.createVerificationDefinition({
         body: {
-          name: "Job Application",
-          version: "1.0",
-          requestedAttributes: {
+          "name": "Job Application",
+          "version": "1.0",
+          "nonce": null,
+          "requested_attributes": {
             "First Name": {
-              name: "First Name",
-              restrictions: [
+              "name": "First Name",
+              "restrictions": [
                 {
-                  schemaId: transcriptSchema.id
-                },
-                // {
-                //   credDefId: credential.credentialId
-                // },
-                // {
-                //   issuerDid: credential.issuerDid
-                // }
-              ]
+                  "schema_id": transcriptSchema.id
+                }
+              ],
+              "non_revoked": {
+                "from": 0,
+                "to": 0
+              }
             },
             "Last Name": {
-              name: "Last Name",
-              restrictions: [ { schemaId: transcriptSchema.id } ]
+              "name": "Last Name",
+              "restrictions": [
+                {
+                  "schema_id": transcriptSchema.id
+                }
+              ],
+              "non_revoked": {
+                "from": 0,
+                "to": 0
+              }
             },
             "Degree": {
-              name: "Degree",
-              restrictions: [ { schemaId: transcriptSchema.id } ]
+              "name": "Degree",
+              "restrictions": [
+                {
+                  "schema_id": transcriptSchema.id
+                }
+              ],
+              "non_revoked": {
+                "from": 0,
+                "to": 0
+              }
             },
             "GPA": {
-              name: "GPA",
-              restrictions: [ { schemaId: transcriptSchema.id } ]
+              "name": "GPA",
+              "restrictions": [
+                {
+                  "schema_id": transcriptSchema.id
+                }
+              ],
+              "non_revoked": {
+                "from": 0,
+                "to": 0
+              }
             }
-
           },
-          requestedPredicates: {
+          "requested_predicates": {
             "GPA": {
-              pType: ">=",
-              pValue: "3.0",
-              name: "GPA",
-              restrictions: [ { schemaId: transcriptSchema.id } ]
+              "p_type": ">=",
+              "p_value": "3.0",
+              "name": "string",
+              "restrictions": [
+                {
+                  "schema_id": transcriptSchema.id
+                }
+              ],
+              "non_revoked": {
+                "from": 0,
+                "to": 0
+              }
+            }
+          },
+          "non_revoked": {
+            "from": 0,
+            "to": 0
           }
-        }
         }
       });
     }
@@ -187,10 +221,21 @@ const run = async () => {
     console.log('\t✓ Alice Connected with ACME Corp');
 
     console.log("\n####### ACME CORP SENDS ALICE A JOB APPLICATION #######");
-    let verificationId = await client.createVerification(verificationDefinition.id, connection.connectionId);
-    console.log("\t✓ Sent Alice a Job Application with id:", verificationId);
-    let verification = await client.getVerification(verificationId);
-    console.log(verification);
+    let verificationIdObject = await client.createVerification({
+      body: {
+        verificationDefinitionId: verificationDefinition.id,
+        connectionId: connection.connectionId
+      }
+    });
+    console.log("\t✓ Created a Job Application for Alice with id:", verificationIdObject.id);
+    let verification = await client.getVerification(verificationIdObject.id);
+    console.log(`\t✓ Verification State: ${verification.state}`);
+    console.log("\tOpen Wallet to Accept Verification Request...");
+    await waitForVerification(verification);
+    console.log("\t✓ Job Application Accepted. Verifying...");
+    let proof = await client.verifyVerification(verificationIdObject.id);
+
+    console.log(proof);
   }
   catch (e) {
     console.error(e);
@@ -202,6 +247,17 @@ const waitForConnection = async (connection) => {
   try {
     while (connection.state !== 'Connected') {
       connection = await client.getConnection(connection.connectionId);
+      await sleep(3000);
+    }
+  }
+  catch (e) {
+    console.error(e);
+  }
+}
+const waitForVerification = async (verification) => {
+  try {
+    while (verification.state != 'Accepted') {
+      verification = await client.getVerification(verification.verificationId);
       await sleep(3000);
     }
   }
