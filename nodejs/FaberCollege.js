@@ -25,7 +25,7 @@ const run = async () => {
     if (schema === undefined) {
       console.log('\tCreating Faber College Transcript Schema');
       schema = await client.createSchema({
-        body: {
+        schemaParameters: {
           name: 'College Transcript',
           version: '1.0',
           attrNames: [ "First Name", "Last Name", "Degree", "GPA", "Year"]
@@ -42,7 +42,7 @@ const run = async () => {
     if (credentialDefinition === undefined) {
       console.log('\tCreating College Transcript Definition');
       credentialDefinition = await client.createCredentialDefinitionForSchemaId(schema.id, {
-        body: {
+        credentialDefinitionParameters: {
           supportRevocation: false,
           tag: "Default"
         }
@@ -54,19 +54,20 @@ const run = async () => {
 
     console.log("\n####### FABER COLLEGE INVITES ALICE TO CONNECT #######");
     let connection = await client.createConnection({
-      body: {
+      connectionInvitationParameters: {
         // connectionId: "unique id", // not specifying id will generate a random one
         multiParty: false
       }
     });
     qrcode.generate(connection.invitationUrl, {small: true});
-    console.log("Scan the QR Code with your mobile wallet to connect and continue...");
+    console.log("Invitation:", connection.invitationUrl);
+    console.log("Scan the QR Code with your mobile wallet to connect or visit URI above to continue...");
     await waitForConnection(connection);
     console.log('\t✓ Alice Connected with Faber College');
 
     console.log("\n####### FABER COLLEGE ISSUES TRANSCRIPT TO ALICE #######");
     let credential = await client.createCredential({
-      body: {
+      credentialOfferParameters: {
         definitionId: credentialDefinition.definitionId,
         connectionId: connection.connectionId,
         automaticIssuance: false,
@@ -85,7 +86,11 @@ const run = async () => {
     console.log("\t✓ Alice Requested Credential");
 
     // If you checked true on automaticIssuance then you don't need this step
-    await client.issueCredential(credential.credentialId);
+    await client.issueCredential(credential.credentialId, {
+      body: {} // empty body to keep credential attributes.
+      // If attributes are incorrect you may add the correct values in the body
+      // body: { additionalProp1: "value" ...}
+    });
     console.log("\t✓ College Transcript Issued to Alice");
 
     console.log("\nNow Alice can use her college transcript to apply for a job at ACME Corp\n");

@@ -16,7 +16,7 @@ const run = async () => {
     if (schema === undefined) {
       console.log('\tCreating ACME Employee Certificate Schema');
       schema = await client.createSchema({
-        body: {
+        schemaParameters: {
           name: 'Employee Certificate',
           version: '1.0',
           attrNames: [ "First Name", "Last Name", "Salary", "Experience", "Start Date" ]
@@ -33,94 +33,18 @@ const run = async () => {
     if (credentialDefinition === undefined) {
       console.log('\tCreating Employee Certificate Definition');
       credentialDefinition = await client.createCredentialDefinitionForSchemaId(schema.id, {
-        body: {
+        credentialDefinitionParameters: {
           supportRevocation: false,
           tag: "Default"
         }
       });
-
-    console.log("\n####### ACME CORP CREATES JOB APPLICATION FORM #######");
-    let transcriptSchema = await FaberCollege.getTranscriptSchema();
-    let verificationDefinitions = await client.listVerificationDefinitions();
-    let verificationDefinition = verificationDefinitions.find(x => x.name === "Job Application");
-    if (verificationDefinition === undefined) {
-      console.log("\tCreating ACME Job Application Definition");
-      verificationDefinition = await client.createVerificationDefinition({
-        body: {
-          name: "Job Application",
-          version: "1.0",
-          requestedAttributes: {
-            "Verify First Name": {
-              name: "First Name",
-              restrictions: [
-                {
-                  schemaId: transcriptSchema.id
-                },
-                // {
-                //   credDefId: credential.credentialId
-                // },
-                // {
-                //   issuerDid: credential.issuerDid
-                // }
-              ]
-            },
-            "Verify Last Name": {
-              name: "Last Name",
-              restrictions: [ { schemaId: transcriptSchema.id } ]
-            },
-            "Verify Degree": {
-              name: "Degree",
-              restrictions: [ { schemaId: transcriptSchema.id } ]
-            },
-            "Verify GPA": {
-              name: "GPA",
-              restrictions: [ { schemaId: transcriptSchema.id } ]
-            }
-
-          },
-          requestedPredicates: {
-          "Good GPA": {
-            pType: ">=",
-            pValue: "3.0",
-            name: "GPA",
-            restrictions: [
-              {
-                schemaId: transcriptSchema.id
-              }
-            ]
-          }
-        }
-        }
-      });
-    }
-    else {
-      console.log('\t✓ ACME Job Application Definition Found');
-    }
-
-    console.log("\n####### ACME INVITES ALICE TO CONNECT #######");
-    let connection = await client.createConnection({
-      body: {
-        // connectionId: "unique id", // not specifying id will generate a random one
-        multiParty: false
-      }
-    });
-    qrcode.generate(connection.invitationUrl, {small: true});
-    console.log("Scan the QR Code with your mobile wallet to connect and continue...");
-    await waitForConnection(connection);
-    console.log('\t✓ Alice Connected with ACME Corp');
-
-    console.log("\n####### ACME CORP SENDS ALICE A JOB APPLICATION #######");
-    let verificationId = await client.createVerification(verificationDefinition.id, connection.connectionId);
-    console.log("\t✓ Sent Alice a Job Application with id:", verificationId);
-    let verification = await client.getVerification(verificationId);
-    console.log(verification);
     }
     else {
       console.log('\t✓ Employee Certificate Definition Found');
     }
 
     console.log("\n####### ACME CORP CREATES JOB APPLICATION FORM #######");
-    let transcriptSchema = FaberCollege.getTranscriptSchema();
+    let transcriptSchema = await FaberCollege.getTranscriptSchema();
     if (transcriptSchema) { console.log("\t✓ Retrieved Transcript Schema from Faber College"); }
     let verificationDefinitions = await client.listVerificationDefinitions();
     let verificationDefinition = verificationDefinitions.find(x => x.data.name === "Job Application");
@@ -210,19 +134,20 @@ const run = async () => {
 
     console.log("\n####### ACME CORP INVITES ALICE TO CONNECT #######");
     let connection = await client.createConnection({
-      body: {
+      connectionInvitationParameters: {
         // connectionId: "unique id", // not specifying id will generate a random one
         multiParty: false
       }
     });
     qrcode.generate(connection.invitationUrl, {small: true});
-    console.log("Scan the QR Code with your mobile wallet to connect and continue...");
+    console.log("Invitation:", connection.invitationUrl);
+    console.log("Scan the QR Code with your mobile wallet or visit the URI above to connect and continue...");
     await waitForConnection(connection);
     console.log('\t✓ Alice Connected with ACME Corp');
 
     console.log("\n####### ACME CORP SENDS ALICE A JOB APPLICATION #######");
     let verificationIdObject = await client.createVerification({
-      body: {
+      verificationParameters: {
         verificationDefinitionId: verificationDefinition.id,
         connectionId: connection.connectionId
       }
@@ -230,12 +155,11 @@ const run = async () => {
     console.log("\t✓ Created a Job Application for Alice with id:", verificationIdObject.id);
     let verification = await client.getVerification(verificationIdObject.id);
     console.log(`\t✓ Verification State: ${verification.state}`);
-    console.log("\tOpen Wallet to Accept Verification Request...");
+    console.log(verification);
+    console.log("\t Open Wallet to Accept Verification Request");
     await waitForVerification(verification);
-    console.log("\t✓ Job Application Accepted. Verifying...");
-    let proof = await client.verifyVerification(verificationIdObject.id);
+    console.log("\t✓ Job Application Accepted.");
 
-    console.log(proof);
   }
   catch (e) {
     console.error(e);
@@ -258,7 +182,6 @@ const waitForVerification = async (verification) => {
   try {
     while (verification.state != 'Accepted') {
       verification = await client.getVerification(verification.verificationId);
-      await sleep(3000);
     }
   }
   catch (e) {

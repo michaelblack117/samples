@@ -1,10 +1,10 @@
 const FaberCollege = require('./FaberCollege');
 const AcmeCorp = require('./AcmeCorp');
 
-function main() {
+async function main() {
   try {
-    // FaberCollege.run();
-    AcmeCorp.run();
+    // await FaberCollege.run();
+    await AcmeCorp.run();
   }
   catch (e) {
     console.error(e);
@@ -13,3 +13,8 @@ function main() {
 }
 
 main();
+
+
+/*
+eyJyZXF1ZXN0X3ByZXNlbnRhdGlvbnN%2BYXR0YWNoIjpbeyJAaWQiOiJsaWJpbmR5LXJlcXVlc3QtcHJlc2VudGF0aW9uLTAiLCJtaW1lLXR5cGUiOiJhcHBsaWNhdGlvbi9qc29uIiwiZGF0YSI6eyJiYXNlNjQiOiJleUp1WVcxbElqb2lTVWxYSUZScFkydGxkQ0lzSW5abGNuTnBiMjRpT2lJeExqQWlMQ0p1YjI1alpTSTZJalkyTURZek1qRTFPVEE1TlRrME1UVXpOakV4TlRjNU5DSXNJbkpsY1hWbGMzUmxaRjloZEhSeWFXSjFkR1Z6SWpwN0ltWjFiR3hmYm1GdFpTSTZleUp1WVcxbElqb2lablZzYkY5dVlXMWxJbjBzSW1SaGRHVmZiMlpmY21WbmFYTjBjbUYwYVc5dUlqcDdJbTVoYldVaU9pSmtZWFJsWDI5bVgzSmxaMmx6ZEhKaGRHbHZiaUo5ZlN3aWNtVnhkV1Z6ZEdWa1gzQnlaV1JwWTJGMFpYTWlPbnQ5ZlE9PSJ9fV0sIkBpZCI6IjRjMDU0NzQwLTI3ZjQtNDFkMS1hMTJiLTZhODQ4ZjEzZDFmNyIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvcHJlc2VudC1wcm9vZi8xLjAvcmVxdWVzdC1wcmVzZW50YXRpb24iLCJ%2BdGhyZWFkIjp7InRoaWQiOiI0YzA1NDc0MC0yN2Y0LTQxZDEtYTEyYi02YTg0OGYxM2QxZjciLCJzZW5kZXJfb3JkZXIiOjAsInJlY2VpdmVkX29yZGVycyI6e319LCJ%2Bc2VydmljZSI6eyJyZWNpcGllbnRLZXlzIjpbIjdMUzViMVpmRzNjTWNyWTNXM1VpTnhKMlFhcEdLcGJUWUZhWDFCRlFlWWdZIl0sInJvdXRpbmdLZXlzIjpbIjZpUW80czNpWGFwWGtUQ1V4cTNjWHZzbnA1ZmVwRUNxYmlOdHNWUFJZRFp5Il0sInNlcnZpY2VFbmRwb2ludCI6Imh0dHBzOi8vYXBpLXN0YWdpbmcucG9ydGFsLnN0cmVldGNyZWQuaWQvYWdlbnQvLzZtelkxTFEza01Pano0ZTVYVkpQeHp1MSJ9fQ%3D%3D
+*/
